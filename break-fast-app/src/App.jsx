@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const theme = {
+const darkTheme = {
   bg: "#0D0B07",
   surface: "#1A1610",
   card: "#221E16",
@@ -11,10 +11,33 @@ const theme = {
   text: "#F5F0E8",
   muted: "#9A9080",
   subtle: "#5C5648",
-  border: "rgba(245,166,35,0.15)",
+  border: "rgba(245,166,35,0.25)",
   borderSoft: "rgba(255,255,255,0.07)",
+  navBg: "rgba(13,11,7,0.92)",
   green: "#4CAF7D",
   red: "#E85D4A",
+  toggleBg: "#2A261C",
+  toggleBorder: "rgba(245,166,35,0.3)",
+};
+
+const lightTheme = {
+  bg: "#FDFAF5",
+  surface: "#FFFFFF",
+  card: "#FFF8EE",
+  cardHover: "#FFF3E0",
+  accent: "#C47E0D",
+  accentDeep: "#9A6009",
+  accentSoft: "rgba(196,126,13,0.10)",
+  text: "#1A1610",
+  muted: "#6B5E4A",
+  subtle: "#A89880",
+  border: "rgba(196,126,13,0.25)",
+  borderSoft: "rgba(0,0,0,0.08)",
+  navBg: "rgba(253,250,245,0.92)",
+  green: "#2E7D52",
+  red: "#C0392B",
+  toggleBg: "#FFF3E0",
+  toggleBorder: "rgba(196,126,13,0.3)",
 };
 
 const CATEGORIES = [
@@ -95,23 +118,22 @@ const RESTAURANTS = [
   },
 ];
 
-const injectStyles = () => {
+const injectStyles = (theme) => {
   const styleId = "fda-styles";
-  if (document.getElementById(styleId)) return;
-  const style = document.createElement("style");
-  style.id = styleId;
+  let style = document.getElementById(styleId);
+  if (!style) { style = document.createElement("style"); style.id = styleId; document.head.appendChild(style); }
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: ${theme.bg}; color: ${theme.text}; font-family: 'DM Sans', sans-serif; }
+    body { background: ${theme.bg}; color: ${theme.text}; font-family: 'DM Sans', sans-serif; transition: background 0.3s, color 0.3s; }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: ${theme.surface}; }
     ::-webkit-scrollbar-thumb { background: ${theme.subtle}; border-radius: 2px; }
-    .fda-app { min-height: 100vh; background: ${theme.bg}; }
+    .fda-app { min-height: 100vh; background: ${theme.bg}; transition: background 0.3s; }
     .serif { font-family: 'Playfair Display', serif; }
 
     /* Nav */
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(13,11,7,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid ${theme.borderSoft}; }
+    .nav { position: sticky; top: 0; z-index: 100; background: ${theme.navBg}; backdrop-filter: blur(20px); border-bottom: 1px solid ${theme.borderSoft}; transition: background 0.3s, border-color 0.3s; }
     .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
     .nav-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: ${theme.accent}; letter-spacing: -0.5px; }
     .nav-logo span { color: ${theme.text}; }
@@ -123,27 +145,32 @@ const injectStyles = () => {
     .btn-icon { width: 38px; height: 38px; border-radius: 8px; background: ${theme.surface}; border: 1px solid ${theme.borderSoft}; color: ${theme.text}; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .btn-icon:hover { background: ${theme.card}; border-color: ${theme.accent}; }
     .cart-badge { position: relative; }
-    .badge { position: absolute; top: -4px; right: -4px; background: ${theme.accent}; color: #000; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .badge { position: absolute; top: -4px; right: -4px; background: ${theme.accent}; color: #fff; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* Theme Toggle */
+    .theme-toggle { display: flex; align-items: center; gap: 8px; background: ${theme.toggleBg}; border: 1px solid ${theme.toggleBorder}; border-radius: 100px; padding: 4px 6px; cursor: pointer; transition: all 0.3s; }
+    .toggle-option { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.25s; }
+    .toggle-option.active { background: ${theme.accent}; }
 
     /* Hero */
     .hero { max-width: 1200px; margin: 0 auto; padding: 48px 24px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
     .hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 2px; color: ${theme.accent}; text-transform: uppercase; margin-bottom: 16px; }
-    .hero-title { font-family: 'Playfair Display', serif; font-size: 52px; line-height: 1.1; font-weight: 700; margin-bottom: 16px; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: 52px; line-height: 1.1; font-weight: 700; margin-bottom: 16px; color: ${theme.text}; }
     .hero-title em { color: ${theme.accent}; font-style: italic; }
     .hero-sub { color: ${theme.muted}; font-size: 16px; line-height: 1.6; max-width: 380px; margin-bottom: 32px; }
     .hero-cta { display: flex; gap: 12px; }
-    .btn-primary { background: ${theme.accent}; color: #000; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-    .btn-primary:hover { background: #FFBB44; transform: translateY(-1px); }
+    .btn-primary { background: ${theme.accent}; color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .btn-primary:hover { background: ${theme.accentDeep}; transform: translateY(-1px); }
     .btn-secondary { background: transparent; color: ${theme.text}; border: 1px solid ${theme.borderSoft}; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
     .btn-secondary:hover { border-color: ${theme.accent}; color: ${theme.accent}; }
     .hero-stats { display: flex; gap: 32px; margin-top: 32px; }
     .stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: ${theme.text}; }
     .stat-label { font-size: 12px; color: ${theme.muted}; margin-top: 2px; }
     .hero-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .hero-card { background: ${theme.card}; border: 1px solid ${theme.borderSoft}; border-radius: 16px; padding: 20px; }
-    .hero-card.featured { grid-column: span 2; background: linear-gradient(135deg, #1e1a10, #2a200a); border-color: ${theme.border}; }
+    .hero-card { background: ${theme.card}; border: 1px solid ${theme.borderSoft}; border-radius: 16px; padding: 20px; transition: background 0.3s, border-color 0.3s; }
+    .hero-card.featured { grid-column: span 2; background: ${theme.card}; border-color: ${theme.border}; }
     .hero-card-tag { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: ${theme.accent}; margin-bottom: 8px; }
-    .hero-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .hero-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 4px; color: ${theme.text}; }
     .hero-card-sub { font-size: 12px; color: ${theme.muted}; }
     .hero-card-meta { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 12px; color: ${theme.muted}; }
     .rating-dot { color: ${theme.accent}; font-size: 14px; }
@@ -151,7 +178,7 @@ const injectStyles = () => {
     /* Categories */
     .section { max-width: 1200px; margin: 0 auto; padding: 0 24px 40px; }
     .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
-    .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: ${theme.text}; }
     .section-link { font-size: 13px; color: ${theme.accent}; cursor: pointer; }
     .cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
     .cats::-webkit-scrollbar { display: none; }
@@ -167,9 +194,9 @@ const injectStyles = () => {
     .rest-banner { height: 140px; position: relative; display: flex; align-items: flex-end; padding: 16px; }
     .rest-banner-pattern { position: absolute; inset: 0; opacity: 0.15; }
     .rest-tags { display: flex; gap: 6px; position: relative; z-index: 1; }
-    .tag { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 100px; background: rgba(0,0,0,0.6); color: ${theme.text}; border: 1px solid rgba(255,255,255,0.15); }
+    .tag { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 100px; background: rgba(0,0,0,0.55); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
     .rest-body { padding: 18px; }
-    .rest-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+    .rest-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 2px; color: ${theme.text}; }
     .rest-cuisine { font-size: 12px; color: ${theme.muted}; margin-bottom: 14px; }
     .rest-meta { display: flex; gap: 16px; }
     .meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: ${theme.muted}; }
@@ -177,14 +204,14 @@ const injectStyles = () => {
     .meta-icon { font-size: 12px; }
 
     /* Restaurant Detail Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
     .modal { background: ${theme.surface}; border-radius: 24px 24px 0 0; width: 100%; max-width: 680px; max-height: 85vh; overflow-y: auto; }
     .modal-hero { height: 180px; position: relative; display: flex; align-items: flex-end; padding: 20px 24px; }
     .modal-hero-pattern { position: absolute; inset: 0; opacity: 0.2; }
-    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.6); border: none; color: ${theme.text}; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: #fff; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 1; }
     .modal-title-wrap { position: relative; z-index: 1; }
-    .modal-rest-name { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-    .modal-rest-cuisine { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+    .modal-rest-name { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+    .modal-rest-cuisine { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 2px; }
     .modal-body { padding: 24px; }
     .modal-meta-row { display: flex; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
     .modal-meta-pill { display: flex; align-items: center; gap: 6px; background: ${theme.card}; border: 1px solid ${theme.borderSoft}; padding: 8px 14px; border-radius: 100px; font-size: 12px; color: ${theme.muted}; }
@@ -193,40 +220,40 @@ const injectStyles = () => {
     .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: ${theme.card}; border: 1px solid ${theme.borderSoft}; border-radius: 14px; margin-bottom: 10px; transition: border-color 0.2s; }
     .menu-item:hover { border-color: ${theme.border}; }
     .menu-item-info { flex: 1; }
-    .menu-item-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .menu-item-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; color: ${theme.text}; }
     .popular-badge { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; background: ${theme.accentSoft}; color: ${theme.accent}; padding: 2px 8px; border-radius: 100px; border: 1px solid ${theme.border}; }
     .menu-item-desc { font-size: 12px; color: ${theme.muted}; line-height: 1.5; margin-bottom: 6px; max-width: 380px; }
     .menu-item-cal { font-size: 11px; color: ${theme.subtle}; }
     .menu-item-right { display: flex; align-items: center; gap: 12px; margin-left: 16px; }
     .menu-item-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: ${theme.accent}; white-space: nowrap; }
-    .add-btn { width: 32px; height: 32px; border-radius: 50%; background: ${theme.accent}; border: none; color: #000; font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-    .add-btn:hover { background: #FFBB44; transform: scale(1.1); }
+    .add-btn { width: 32px; height: 32px; border-radius: 50%; background: ${theme.accent}; border: none; color: #fff; font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+    .add-btn:hover { background: ${theme.accentDeep}; transform: scale(1.1); }
 
     /* Cart Panel */
-    .cart-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 380px; background: ${theme.surface}; border-left: 1px solid ${theme.borderSoft}; z-index: 300; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .cart-panel { position: fixed; top: 0; right: 0; height: 100vh; width: 380px; background: ${theme.surface}; border-left: 1px solid ${theme.borderSoft}; z-index: 300; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.3s, border-color 0.3s; }
     .cart-panel.open { transform: translateX(0); }
     .cart-header { padding: 24px; border-bottom: 1px solid ${theme.borderSoft}; display: flex; align-items: center; justify-content: space-between; }
-    .cart-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
+    .cart-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: ${theme.text}; }
     .cart-close { width: 32px; height: 32px; border-radius: 50%; background: ${theme.card}; border: 1px solid ${theme.borderSoft}; color: ${theme.text}; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
     .cart-items { flex: 1; overflow-y: auto; padding: 16px 24px; }
     .cart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: ${theme.muted}; gap: 8px; }
     .cart-empty-icon { font-size: 40px; opacity: 0.3; }
     .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid ${theme.borderSoft}; }
     .cart-item-info { flex: 1; }
-    .cart-item-name { font-size: 14px; font-weight: 500; }
+    .cart-item-name { font-size: 14px; font-weight: 500; color: ${theme.text}; }
     .cart-item-price { font-size: 13px; color: ${theme.accent}; margin-top: 2px; }
     .qty-ctrl { display: flex; align-items: center; gap: 10px; }
     .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid ${theme.borderSoft}; background: ${theme.card}; color: ${theme.text}; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
     .qty-btn:hover { border-color: ${theme.accent}; color: ${theme.accent}; }
-    .qty-num { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
+    .qty-num { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; color: ${theme.text}; }
     .cart-footer { padding: 24px; border-top: 1px solid ${theme.borderSoft}; }
     .cart-row { display: flex; justify-content: space-between; font-size: 13px; color: ${theme.muted}; margin-bottom: 8px; }
     .cart-row.total { font-size: 18px; color: ${theme.text}; font-weight: 600; margin-top: 12px; margin-bottom: 0; padding-top: 12px; border-top: 1px solid ${theme.borderSoft}; }
-    .checkout-btn { width: 100%; margin-top: 16px; background: ${theme.accent}; color: #000; border: none; padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .checkout-btn:hover { background: #FFBB44; transform: translateY(-1px); }
+    .checkout-btn { width: 100%; margin-top: 16px; background: ${theme.accent}; color: #fff; border: none; padding: 16px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .checkout-btn:hover { background: ${theme.accentDeep}; transform: translateY(-1px); }
 
     /* Toast */
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: ${theme.accent}; color: #000; padding: 12px 24px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: ${theme.accent}; color: #fff; padding: 12px 24px; border-radius: 100px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
     /* Footer divider */
@@ -240,7 +267,6 @@ const injectStyles = () => {
       .cart-panel { width: 100%; }
     }
   `;
-  document.head.appendChild(style);
 };
 
 // Geometric SVG pattern for cards
@@ -257,6 +283,7 @@ const Pattern = ({ color, style = {} }) => (
 );
 
 export default function FoodDeliveryApp() {
+  const [isDark, setIsDark] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedRest, setSelectedRest] = useState(null);
@@ -264,7 +291,9 @@ export default function FoodDeliveryApp() {
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState("");
 
-  useEffect(() => { injectStyles(); }, []);
+  const theme = isDark ? darkTheme : lightTheme;
+
+  useEffect(() => { injectStyles(theme); }, [isDark]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -303,12 +332,20 @@ export default function FoodDeliveryApp() {
       {/* Nav */}
       <nav className="nav">
         <div className="nav-inner">
-          <div className="nav-logo">BKFast<span>.</span></div>
+          <div className="nav-logo">feast<span>.</span></div>
           <div className="nav-search">
             <span style={{ color: theme.subtle, fontSize: 14 }}>⌕</span>
             <input placeholder="Search restaurants or cuisine…" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="nav-actions">
+            <button
+              className="theme-toggle"
+              onClick={() => setIsDark(d => !d)}
+              title="Toggle theme"
+            >
+              <div className={`toggle-option${isDark ? " active" : ""}`}>🌙</div>
+              <div className={`toggle-option${!isDark ? " active" : ""}`}>☀️</div>
+            </button>
             <button className="btn-icon">♡</button>
             <button className="btn-icon cart-badge" onClick={() => setCartOpen(true)}>
               🛒
