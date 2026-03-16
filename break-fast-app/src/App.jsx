@@ -332,7 +332,7 @@ export default function FoodDeliveryApp() {
       {/* Nav */}
       <nav className="nav">
         <div className="nav-inner">
-          <div className="nav-logo">feast<span>.</span></div>
+          <div className="nav-logo">BKFast<span>.</span></div>
           <div className="nav-search">
             <span style={{ color: theme.subtle, fontSize: 14 }}>⌕</span>
             <input placeholder="Search restaurants or cuisine…" value={search} onChange={e => setSearch(e.target.value)} />
