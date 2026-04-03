@@ -1,16 +1,76 @@
-# React + Vite
+# BKFast Direct Ordering
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This app is now cuisine-first instead of restaurant-first.
 
-Currently, two official plugins are available:
+- Customers order dishes directly from a shared menu catalog
+- Frontend is React + Vite
+- Backend is a Cloudflare Worker in `worker/index.js`
+- Seed data lives in `server/data.js`
+- Optional D1 persistence uses `migrations/0001_init.sql`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Demo accounts
 
-## React Compiler
+- Customer: `demo@bkfast.app` / `Demo123!`
+- Admin: `admin@bkfast.app` / `Admin123!`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Main API routes
 
-## Expanding the ESLint configuration
+- `GET /api/health`
+- `GET /api/cuisines`
+- `GET /api/menu-items`
+- `GET /api/menu-items/:id`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/session`
+- `POST /api/auth/logout`
+- `POST /api/orders`
+- `GET /api/orders/my`
+- `GET /api/admin/orders`
+- `POST /api/admin/orders/:id/advance`
+- `POST /api/admin/init`
+- `POST /api/admin/seed`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Development
+
+- `npm run dev` runs the frontend only
+- `npm run build` builds the frontend
+- `npm run preview` builds and starts the Worker with assets for full local testing
+
+The frontend uses relative `/api/...` calls so the Worker and frontend can run together.
+
+## D1 setup
+
+If you want persistent users, sessions, and orders:
+
+1. Create a D1 database
+2. Add the `DB` binding in `wrangler.jsonc`
+3. Apply `migrations/0001_init.sql`
+4. Start the app and log in as the demo admin
+5. Call `POST /api/admin/seed` once to load cuisines and menu items
+
+Without D1, the app still works with in-memory fallback for local testing.
+
+## Order payload
+
+`POST /api/orders` expects:
+
+```json
+{
+  "items": [
+    { "itemId": 101, "quantity": 2 },
+    { "itemId": 109, "quantity": 1 }
+  ],
+  "customer": {
+    "name": "Sajid",
+    "phone": "+91-9999999999",
+    "address": "Ghaziabad"
+  },
+  "paymentMethod": "card"
+}
+```
+
+Orders now include:
+
+- fulfillment status like `payment_authorized`, `preparing`, or `delivered`
+- payment status like `authorized`, `pending`, or `captured`
+- admin progression through the delivery lifecycle
