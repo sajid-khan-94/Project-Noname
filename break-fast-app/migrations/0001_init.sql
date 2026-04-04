@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS cuisines (
   id TEXT PRIMARY KEY,
-  label TEXT NOT NULL
+  label TEXT NOT NULL,
+  thumbnail_url TEXT NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS menu_items (
@@ -58,4 +60,38 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INTEGER NOT NULL,
   unit_price REAL NOT NULL,
   line_total REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id TEXT PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  discount_percent REAL NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS promo_code_cuisines (
+  promo_id TEXT NOT NULL,
+  cuisine_id TEXT NOT NULL,
+  PRIMARY KEY (promo_id, cuisine_id)
+);
+
+CREATE TABLE IF NOT EXISTS refunds (
+  id TEXT PRIMARY KEY,
+  order_id TEXT NOT NULL,
+  amount REAL NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS payment_gateways (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  mode TEXT NOT NULL,
+  supports_refunds INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL
 );

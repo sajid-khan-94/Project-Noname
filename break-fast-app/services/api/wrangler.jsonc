@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "bkfast-api",
+  "main": "../../worker/index.js",
+  "compatibility_date": "2025-09-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  }
+  // Add your D1 binding here for production:
+  // "d1_databases": [
+  //   {
+  //     "binding": "DB",
+  //     "database_name": "break-fast-db",
+  //     "database_id": "your-d1-id"
+  //   }
+  // ]
+}

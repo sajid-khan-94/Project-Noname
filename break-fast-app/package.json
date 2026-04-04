@@ -4,11 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "npm run build && wrangler dev",
-    "deploy": "npm run build && wrangler deploy"
+    "dev": "npm run dev:customer",
+    "dev:customer": "vite --config apps/customer/vite.config.js",
+    "build:customer": "vite build --config apps/customer/vite.config.js",
+    "preview:customer": "vite preview --config apps/customer/vite.config.js --host",
+    "dev:admin": "vite --config apps/admin/vite.config.js",
+    "build:admin": "vite build --config apps/admin/vite.config.js",
+    "preview:admin": "vite preview --config apps/admin/vite.config.js --host",
+    "dev:api": "wrangler dev -c services/api/wrangler.jsonc",
+    "deploy:api": "wrangler deploy -c services/api/wrangler.jsonc",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "build": "npm run build:customer && npm run build:admin",
+    "lint": "eslint apps services shared src worker server *.js"
   },
   "dependencies": {
     "react": "^19.2.4",

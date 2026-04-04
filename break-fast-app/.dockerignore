@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+.wrangler
+services/api/.wrangler
+npm-debug.log
+Dockerfile*
+**/node_modules

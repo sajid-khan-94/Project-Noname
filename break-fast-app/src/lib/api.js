@@ -93,3 +93,81 @@ export function advanceAdminOrder(orderId) {
     method: "POST",
   });
 }
+
+export function fetchAdminCuisines() {
+  return request("/api/admin/cuisines");
+}
+
+export function saveAdminCuisine(payload) {
+  return request("/api/admin/cuisines", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteAdminCuisine(cuisineId) {
+  return request(`/api/admin/cuisines/${cuisineId}`, {
+    method: "DELETE",
+  });
+}
+
+export function fetchAdminUsers() {
+  return request("/api/admin/users");
+}
+
+export function fetchAdminPromos() {
+  return request("/api/admin/promos");
+}
+
+export function saveAdminPromo(payload) {
+  return request("/api/admin/promos", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteAdminPromo(promoId) {
+  return request(`/api/admin/promos/${promoId}`, {
+    method: "DELETE",
+  });
+}
+
+export function fetchAdminLiveOrders() {
+  return request("/api/admin/orders/live");
+}
+
+export function fetchAdminOrderMetrics() {
+  return request("/api/admin/orders/metrics");
+}
+
+export function fetchAdminBilling() {
+  return request("/api/admin/billing");
+}
+
+export function fetchAdminRefunds() {
+  return request("/api/admin/refunds");
+}
+
+export function createAdminRefund(payload) {
+  return request("/api/admin/refunds", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchAdminPaymentGateways() {
+  return request("/api/admin/payment-gateways");
+}
+
+export function saveAdminPaymentGateway(payload) {
+  return request("/api/admin/payment-gateways", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteAdminPaymentGateway(gatewayId) {
+  return request(`/api/admin/payment-gateways/${gatewayId}`, {
+    method: "DELETE",
+  });
+}

@@ -1,76 +1,194 @@
-# BKFast Direct Ordering
+# BKFast Containerized Service Architecture
 
-This app is now cuisine-first instead of restaurant-first.
+This repo now supports a container-first topology with separate frontend and backend services:
 
-- Customers order dishes directly from a shared menu catalog
-- Frontend is React + Vite
-- Backend is a Cloudflare Worker in `worker/index.js`
-- Seed data lives in `server/data.js`
-- Optional D1 persistence uses `migrations/0001_init.sql`
+- `customer-frontend`: customer portal
+- `admin-frontend`: admin portal
+- `gateway`: the only browser-facing API
+- `auth-service`: registration, login, session validation, user listing
+- `payment-service`: gateways, payment status/history, billing, refunds
+- `finance-service`: cuisines, menu items, promos, orders, order status/history
+
+The browser only calls the gateway. The gateway fans out to auth, payment, and finance internally.
+
+Each deployable now also has its own local `package.json`, so customer, admin, gateway, auth, payment, and finance can be built and containerized as independent units instead of borrowing the root package metadata.
+
+## Service map
+
+```text
+Customer/Admin Frontends -> Gateway -> Auth Service
+                                 -> Payment Service
+                                 -> Finance Service
+```
+
+Local container ports:
+
+- Customer portal: `http://localhost:4173`
+- Admin portal: `http://localhost:4174`
+- Gateway API: `http://localhost:8080`
+- Auth service: `http://localhost:8081`
+- Payment service: `http://localhost:8082`
+- Finance service: `http://localhost:8083`
+
+## Repo layout
+
+- `apps/customer`: customer React + Vite app
+- `apps/admin`: admin React + Vite app
+- `apps/customer/package.json`: customer app-local manifest
+- `apps/admin/package.json`: admin app-local manifest
+- `shared/api/client.js`: shared frontend API client
+- `services/gateway`: public gateway service
+- `services/auth`: auth service
+- `services/payment`: payment and refund service
+- `services/finance`: order, cuisine, promo, and history service
+- `services/gateway/package.json`: gateway-local manifest
+- `services/auth/package.json`: auth-local manifest
+- `services/payment/package.json`: payment-local manifest
+- `services/finance/package.json`: finance-local manifest
+- `services/common`: shared server utilities and file-backed domain stores
+- `docker-compose.yml`: full local orchestration
+- `infra/nginx/spa.conf`: SPA nginx config
 
 ## Demo accounts
 
 - Customer: `demo@bkfast.app` / `Demo123!`
 - Admin: `admin@bkfast.app` / `Admin123!`
+- Manager: `manager@bkfast.app` / `Manager123!`
+- Finance: `finance@bkfast.app` / `Finance123!`
+- Operations: `ops@bkfast.app` / `Ops123!`
 
-## Main API routes
+## Local non-container development
+
+Install dependencies:
+
+```powershell
+npm.cmd install
+```
+
+Run the frontends:
+
+```powershell
+npm.cmd run dev:customer
+npm.cmd run dev:admin
+```
+
+The existing Cloudflare Worker flow still exists under `services/api`, but the new microservice container path is now the recommended way to evolve auth/payment/finance separately.
+
+## Container workflow
+
+Build and start everything:
+
+```powershell
+docker compose up --build
+```
+
+Or via scripts:
+
+```powershell
+npm.cmd run docker:up
+```
+
+Stop the stack:
+
+```powershell
+docker compose down
+```
+
+The frontend images build with:
+
+- customer `VITE_API_BASE_URL=http://localhost:8080`
+- admin `VITE_API_BASE_URL=http://localhost:8080`
+
+If you deploy to another gateway domain, rebuild the frontend images with a new `VITE_API_BASE_URL`.
+
+## Persistence model
+
+For local container development, each backend service gets its own mounted JSON-backed data volume:
+
+- `auth-data`
+- `payment-data`
+- `finance-data`
+
+That keeps service ownership clean:
+
+- Auth owns users and sessions
+- Payment owns gateways, payments, billing, and refunds
+- Finance owns catalog, promos, orders, and order history
+
+This is a good local-dev and architecture-transition setup. For production, replace these JSON volumes with real persistent infrastructure such as:
+
+- Postgres for service data
+- Redis for sessions/cache
+- message bus or event streaming for cross-service workflows
+
+## Gateway-facing API routes
+
+Customer-facing:
 
 - `GET /api/health`
 - `GET /api/cuisines`
 - `GET /api/menu-items`
-- `GET /api/menu-items/:id`
+- `GET /api/payment-gateways`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/session`
 - `POST /api/auth/logout`
 - `POST /api/orders`
 - `GET /api/orders/my`
+
+Admin-facing:
+
 - `GET /api/admin/orders`
+- `GET /api/admin/orders/live`
+- `GET /api/admin/orders/metrics`
 - `POST /api/admin/orders/:id/advance`
-- `POST /api/admin/init`
-- `POST /api/admin/seed`
+- `GET /api/admin/cuisines`
+- `POST /api/admin/cuisines`
+- `DELETE /api/admin/cuisines/:id`
+- `GET /api/admin/users`
+- `GET /api/admin/promos`
+- `POST /api/admin/promos`
+- `DELETE /api/admin/promos/:id`
+- `GET /api/admin/billing`
+- `GET /api/admin/refunds`
+- `POST /api/admin/refunds`
+- `GET /api/admin/payment-gateways`
+- `POST /api/admin/payment-gateways`
+- `DELETE /api/admin/payment-gateways/:id`
+- `GET /api/admin/payments/history`
 
-## Development
+## Responsibility split
 
-- `npm run dev` runs the frontend only
-- `npm run build` builds the frontend
-- `npm run preview` builds and starts the Worker with assets for full local testing
+`auth-service`
 
-The frontend uses relative `/api/...` calls so the Worker and frontend can run together.
+- registration and login
+- session token validation
+- account listing and active session counts
 
-## D1 setup
+`payment-service`
 
-If you want persistent users, sessions, and orders:
+- payment gateway management
+- payment initialization and status history
+- refunds
+- billing summary
 
-1. Create a D1 database
-2. Add the `DB` binding in `wrangler.jsonc`
-3. Apply `migrations/0001_init.sql`
-4. Start the app and log in as the demo admin
-5. Call `POST /api/admin/seed` once to load cuisines and menu items
+`finance-service`
 
-Without D1, the app still works with in-memory fallback for local testing.
+- cuisines and menu catalog
+- promo grouping by cuisine
+- order creation
+- live delivery monitoring
+- order history and status progression
 
-## Order payload
+`gateway`
 
-`POST /api/orders` expects:
+- authentication boundary for the browser
+- role-based authorization
+- orchestration across payment and finance during order creation and refunds
 
-```json
-{
-  "items": [
-    { "itemId": 101, "quantity": 2 },
-    { "itemId": 109, "quantity": 1 }
-  ],
-  "customer": {
-    "name": "Sajid",
-    "phone": "+91-9999999999",
-    "address": "Ghaziabad"
-  },
-  "paymentMethod": "card"
-}
-```
+## Staff roles
 
-Orders now include:
-
-- fulfillment status like `payment_authorized`, `preparing`, or `delivered`
-- payment status like `authorized`, `pending`, or `captured`
-- admin progression through the delivery lifecycle
+- `admin`: full access
+- `manager`: orders, cuisines, promos, and user visibility
+- `finance`: billing, refunds, payment history, and payment gateways
+- `operations`: live order monitoring and order progression

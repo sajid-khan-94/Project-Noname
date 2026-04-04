@@ -1,10 +1,10 @@
 export const cuisines = [
-  { id: "all", label: "All" },
-  { id: "indian", label: "Indian" },
-  { id: "italian", label: "Italian" },
-  { id: "japanese", label: "Japanese" },
-  { id: "healthy", label: "Healthy" },
-  { id: "desserts", label: "Desserts" },
+  { id: "all", label: "All", thumbnail: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80", enabled: true },
+  { id: "indian", label: "Indian", thumbnail: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80", enabled: true },
+  { id: "italian", label: "Italian", thumbnail: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80", enabled: true },
+  { id: "japanese", label: "Japanese", thumbnail: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80", enabled: true },
+  { id: "healthy", label: "Healthy", thumbnail: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80", enabled: true },
+  { id: "desserts", label: "Desserts", thumbnail: "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80", enabled: true },
 ];
 
 export const menuItems = [
@@ -23,6 +23,9 @@ export const menuItems = [
 export const seededUsers = [
   { id: "user_demo", name: "Demo User", email: "demo@bkfast.app", password: "Demo123!", role: "customer" },
   { id: "admin_demo", name: "Admin", email: "admin@bkfast.app", password: "Admin123!", role: "admin" },
+  { id: "manager_demo", name: "Store Manager", email: "manager@bkfast.app", password: "Manager123!", role: "manager" },
+  { id: "finance_demo", name: "Finance Lead", email: "finance@bkfast.app", password: "Finance123!", role: "finance" },
+  { id: "ops_demo", name: "Ops Controller", email: "ops@bkfast.app", password: "Ops123!", role: "operations" },
 ];
 
 export function listMenuItems({ cuisine = "all", search = "" } = {}) {
