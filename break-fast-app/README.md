@@ -103,11 +103,11 @@ If you deploy to another gateway domain, rebuild the frontend images with a new 
 
 ## Persistence model
 
-For local container development, each backend service gets its own mounted JSON-backed data volume:
+For local and production-style container development, each backend service now gets its own dedicated Postgres database:
 
-- `auth-data`
-- `payment-data`
-- `finance-data`
+- `auth-db`
+- `payment-db`
+- `finance-db`
 
 That keeps service ownership clean:
 
@@ -115,7 +115,13 @@ That keeps service ownership clean:
 - Payment owns gateways, payments, billing, and refunds
 - Finance owns catalog, promos, orders, and order history
 
-This is a good local-dev and architecture-transition setup. For production, replace these JSON volumes with real persistent infrastructure such as:
+Docker volumes back the three Postgres instances:
+
+- `auth-db-data`
+- `payment-db-data`
+- `finance-db-data`
+
+This is a much closer production-style split. For larger production environments, the next step would be managed infrastructure such as:
 
 - Postgres for service data
 - Redis for sessions/cache
@@ -164,6 +170,7 @@ Admin-facing:
 - registration and login
 - session token validation
 - account listing and active session counts
+- dedicated Postgres schema for users and sessions
 
 `payment-service`
 
@@ -171,6 +178,7 @@ Admin-facing:
 - payment initialization and status history
 - refunds
 - billing summary
+- dedicated Postgres schema for gateways, payments, payment history, and refunds
 
 `finance-service`
 
@@ -179,6 +187,7 @@ Admin-facing:
 - order creation
 - live delivery monitoring
 - order history and status progression
+- dedicated Postgres schema for cuisines, promos, orders, and order items
 
 `gateway`
 

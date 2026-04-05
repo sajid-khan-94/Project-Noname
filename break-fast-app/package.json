@@ -19,6 +19,7 @@
     "lint": "eslint apps services shared src worker server *.js"
   },
   "dependencies": {
+    "pg": "^8.20.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

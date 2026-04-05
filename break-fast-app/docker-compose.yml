@@ -33,9 +33,54 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - auth-service
-      - payment-service
-      - finance-service
+      auth-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      finance-service:
+        condition: service_started
+
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: bkfast
+      POSTGRES_PASSWORD: bkfast
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bkfast -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+
+  payment-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: bkfast
+      POSTGRES_PASSWORD: bkfast
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bkfast -d payment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+
+  finance-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: finance_db
+      POSTGRES_USER: bkfast
+      POSTGRES_PASSWORD: bkfast
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bkfast -d finance_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - finance-db-data:/var/lib/postgresql/data
 
   auth-service:
     build:
@@ -43,9 +88,10 @@ services:
       dockerfile: services/auth/Dockerfile
     environment:
       PORT: 8081
-      DATA_DIR: /app/data
-    volumes:
-      - auth-data:/app/data
+      DATABASE_URL: postgresql://bkfast:bkfast@auth-db:5432/auth_db
+    depends_on:
+      auth-db:
+        condition: service_healthy
     ports:
       - "8081:8081"
 
@@ -55,9 +101,10 @@ services:
       dockerfile: services/payment/Dockerfile
     environment:
       PORT: 8082
-      DATA_DIR: /app/data
-    volumes:
-      - payment-data:/app/data
+      DATABASE_URL: postgresql://bkfast:bkfast@payment-db:5432/payment_db
+    depends_on:
+      payment-db:
+        condition: service_healthy
     ports:
       - "8082:8082"
 
@@ -67,13 +114,14 @@ services:
       dockerfile: services/finance/Dockerfile
     environment:
       PORT: 8083
-      DATA_DIR: /app/data
-    volumes:
-      - finance-data:/app/data
+      DATABASE_URL: postgresql://bkfast:bkfast@finance-db:5432/finance_db
+    depends_on:
+      finance-db:
+        condition: service_healthy
     ports:
       - "8083:8083"
 
 volumes:
-  auth-data:
-  payment-data:
-  finance-data:
+  auth-db-data:
+  payment-db-data:
+  finance-db-data:
